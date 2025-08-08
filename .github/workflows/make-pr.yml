@@ -1,10 +1,10 @@
-name: Create Branch and List Pull Requests
+name: Create Branch and Pull Request
 
 on:
   workflow_dispatch:
 
 jobs:
-  create-branch-and-list-prs:
+  create-branch-and-pr:
     runs-on: ubuntu-latest
     
     permissions:
@@ -36,15 +36,12 @@ jobs:
       run: |
         git push origin ${{ env.NEW_BRANCH }}
     
-    - name: List all pull requests using GitHub CLI
+    - name: Create Pull Request
       run: |
-        gh pr list --state all --json number,title,headRefName,baseRefName,author,state --template '{{range .}}{{.number}} | {{.title}} | {{.headRefName}} -> {{.baseRefName}} | {{.author.login}} | {{.state}}{{"\n"}}{{end}}'
+        gh pr create \
+          --title "Initial commit from GitHub Actions" \
+          --body "This PR was automatically created by GitHub Actions workflow. It contains the initial commit for branch ${{ env.NEW_BRANCH }}." \
+          --base main \
+          --head ${{ env.NEW_BRANCH }}
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: List PRs using GitHub REST API (alternative)
-      run: |
-        curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls?state=all" \
-          | jq -r '.[] | "\(.number) | \(.title) | \(.head.ref) -> \(.base.ref) | \(.user.login) | \(.state)"'
