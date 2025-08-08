@@ -9,7 +9,7 @@ jobs:
     
     permissions:
       contents: write
-      pull-requests: read
+      pull-requests: write
     
     env:
       NEW_BRANCH: feature/init-branch-${{ github.run_id }}
