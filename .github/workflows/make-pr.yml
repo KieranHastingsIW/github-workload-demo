@@ -40,7 +40,7 @@ jobs:
         git checkout -b ${{ env.NEW_BRANCH }}
         echo "# Initial commit from GitHub Actions" >> README.md
         mkdir ${{ env.NEW_DIRECTORY }}
-        cp template/* ${{ env.NEW_DIRECTORY }}/
+        cp -r template/* ${{ env.NEW_DIRECTORY }}/
         git add .
         git commit -m "Initial commit for branch ${{ env.NEW_BRANCH }}"
     
