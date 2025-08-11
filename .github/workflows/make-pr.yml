@@ -2,6 +2,15 @@ name: Create Branch and Pull Request
 
 on:
   workflow_dispatch:
+    inputs:
+      workloadName:
+        description: 'Name of the workload'
+        required: true
+        type: string
+      serviceNowID:
+        description: 'Service Now ID'
+        required: true
+        type: string
 
 jobs:
   create-branch-and-pr:
@@ -12,8 +21,9 @@ jobs:
       pull-requests: write
     
     env:
-      NEW_BRANCH: feature/init-branch-${{ github.run_id }}
-    
+      NEW_BRANCH: workload/${{ inputs.workloadName }}_${{ inputs.serviceNowID }}
+      NEW_DIRECTORY: workload_${{ inputs.workloadName }}_${{ inputs.serviceNowID }}
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -28,9 +38,10 @@ jobs:
     - name: Create new branch and initial commit
       run: |
         git checkout -b ${{ env.NEW_BRANCH }}
-        echo "# Initial commit from GitHub Actions" > README.md
-        mkdir new-directory-${{ env.NEW_BRANCH }}
-        cp template/* new-directory-${{ env.NEW_BRANCH }}/
+        echo "# Initial commit from GitHub Actions" >> README.md
+        mkdir ${{ env.NEW_DIRECTORY }}
+        cp template/* ${{ env.NEW_DIRECTORY }}/
+        git add .
         git commit -m "Initial commit for branch ${{ env.NEW_BRANCH }}"
     
     - name: Push new branch to remote
