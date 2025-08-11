@@ -29,7 +29,8 @@ jobs:
       run: |
         git checkout -b ${{ env.NEW_BRANCH }}
         echo "# Initial commit from GitHub Actions" > README.md
-        git add README.md
+        mkdir new-directory-${{ env.NEW_BRANCH }}
+        cp template/* new-directory-${{ env.NEW_BRANCH }}/
         git commit -m "Initial commit for branch ${{ env.NEW_BRANCH }}"
     
     - name: Push new branch to remote

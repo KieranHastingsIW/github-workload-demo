@@ -1,0 +1,65 @@
+name: Terraform Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      workload_directory:
+        description: 'Directory containing the terraform subdirectory to validate'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      workload_directory:
+        description: 'Directory containing the terraform subdirectory to validate'
+        required: true
+        type: string
+
+jobs:
+  terraform-validate:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: latest
+    
+    - name: Validate terraform directory
+      run: |
+        WORKLOAD_DIR="${{ inputs.workload_directory }}"
+        TERRAFORM_DIR="${WORKLOAD_DIR}/terraform"
+        
+        if [ ! -d "$WORKLOAD_DIR" ]; then
+          echo "Error: Workload directory '$WORKLOAD_DIR' does not exist"
+          exit 1
+        fi
+        
+        if [ ! -d "$TERRAFORM_DIR" ]; then
+          echo "Error: Terraform directory '$TERRAFORM_DIR' does not exist"
+          exit 1
+        fi
+        
+        echo "Using Terraform directory: $TERRAFORM_DIR"
+    
+    - name: Terraform Init
+      run: |
+        cd "${{ inputs.workload_directory }}/terraform"
+        terraform init
+    
+    - name: Terraform Validate
+      run: |
+        cd "${{ inputs.workload_directory }}/terraform"
+        terraform validate
+    
+    - name: Terraform Plan
+      run: |
+        cd "${{ inputs.workload_directory }}/terraform"
+        terraform plan
