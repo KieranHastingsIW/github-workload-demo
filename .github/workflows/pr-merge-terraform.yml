@@ -9,6 +9,9 @@ jobs:
   detect-and-validate:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    outputs:
+      workload_dir: ${{ steps.find-workload.outputs.workload_dir }}
+      has_workload: ${{ steps.find-workload.outputs.has_workload }}
     
     permissions:
       contents: read
@@ -48,8 +51,9 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Call Terraform Validation Workflow
-      if: steps.find-workload.outputs.has_workload == 'true'
-      uses: ./.github/workflows/terraform-validate.yml
-      with:
-        workload_directory: ${{ steps.find-workload.outputs.workload_dir }}
+  terraform-validation:
+    needs: detect-and-validate
+    if: needs.detect-and-validate.outputs.has_workload == 'true'
+    uses: ./.github/workflows/terraform-validate.yml
+    with:
+      workload_directory: ${{ needs.detect-and-validate.outputs.workload_dir }}
