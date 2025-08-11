@@ -1,0 +1,55 @@
+name: Terraform Validation on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  detect-and-validate:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      actions: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Find new workload directory
+      id: find-workload
+      run: |
+        # Get the files changed in the merged PR
+        gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' > changed_files.txt
+        
+        # Find new directories (exclude .github and existing dirs)
+        NEW_DIRS=$(cat changed_files.txt | cut -d'/' -f1 | sort -u | grep -v '^\.github$' | grep -v '^template$' | head -1)
+        
+        if [ -z "$NEW_DIRS" ]; then
+          echo "No new workload directory found"
+          echo "has_workload=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        # Check if the directory has a terraform subdirectory
+        if [ ! -d "$NEW_DIRS/terraform" ]; then
+          echo "Directory $NEW_DIRS does not contain terraform subdirectory"
+          echo "has_workload=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        echo "workload_dir=$NEW_DIRS" >> $GITHUB_OUTPUT
+        echo "has_workload=true" >> $GITHUB_OUTPUT
+        echo "Found workload directory: $NEW_DIRS"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Call Terraform Validation Workflow
+      if: steps.find-workload.outputs.has_workload == 'true'
+      uses: ./.github/workflows/terraform-validate.yml
+      with:
+        workload_directory: ${{ steps.find-workload.outputs.workload_dir }}
