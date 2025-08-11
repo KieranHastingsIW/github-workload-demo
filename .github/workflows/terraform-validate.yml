@@ -1,12 +1,12 @@
 name: Terraform Validation
 
 on:
-  workflow_dispatch:
-    inputs:
-      workload_directory:
-        description: 'Directory containing the terraform subdirectory to validate'
-        required: true
-        type: string
+  # workflow_dispatch:
+  #   inputs:
+  #     workload_directory:
+  #       description: 'Directory containing the terraform subdirectory to validate'
+  #       required: true
+  #       type: string
   workflow_call:
     inputs:
       workload_directory:
