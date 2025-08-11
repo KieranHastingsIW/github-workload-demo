@@ -38,7 +38,6 @@ jobs:
     - name: Create new branch and initial commit
       run: |
         git checkout -b ${{ env.NEW_BRANCH }}
-        echo "# Initial commit from GitHub Actions" >> README.md
         mkdir ${{ env.NEW_DIRECTORY }}
         cp -r template/* ${{ env.NEW_DIRECTORY }}/
         git add .
