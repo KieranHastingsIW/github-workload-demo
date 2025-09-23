@@ -1,0 +1,30 @@
+name: API Triggered Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      param1:
+        description: 'First parameter'
+        required: true
+        type: string
+      param2:
+        description: 'Second parameter'
+        required: true
+        type: string
+      param3:
+        description: 'Third parameter'
+        required: true
+        type: string
+
+jobs:
+  run-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use parameters
+        run: |
+          echo "Parameter 1: ${{ inputs.param1 }}"
+          echo "Parameter 2: ${{ inputs.param2 }}"
+          echo "Parameter 3: ${{ inputs.param3 }}"
